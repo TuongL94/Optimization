@@ -1,23 +1,20 @@
 function [lambda, No_of_iterations] = armijo(func,x,d)
 
-F_zero = func(x); % F(0) = f(x+0*d)
+F_zero = func(x);
 No_of_iterations = 1;
 lambda = 1;
-tol = 10^-50;
-satisfied = false;
+alpha = 2;
+epsilon = 0.7;
+h = 1/realmax;
 
-while satisfied ~= true
-    F_lambda = func(x+lambda*d);
-    if F_lambda == Inf
-        lambda = lambda/10;
-    elseif F_lambda > F_zero
-        lambda = lambda/10;
-    elseif F_lambda == F_zero 
-        lambda = lambda*10;
-    elseif isnan(F_lambda)
-        lambda = lambda/2;
+fprim0 = (func(x+h*d) - func(x))/h;
+T = @(t) F_zero + epsilon*t*fprim0;
+
+while func(x+lambda*d) >= T(lambda) || func(x+alpha*lambda*d) <= T(alpha*lambda)
+    if func(x+lambda*d) > T(lambda)
+        lambda = lambda/alpha;
     else
-        satisfied = true;
+        lambda = lambda*alpha;
     end
 end
 
