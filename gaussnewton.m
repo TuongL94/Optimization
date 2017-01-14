@@ -9,6 +9,7 @@ end
 % Parameters
 max_no_of_iterations = 100;
 no_of_iterations = 0;
+norm_tol = 10^3*tol;
 
 % Define the residual functions and their gradients. If the start point is
 % of 2 variables the residual functions and the gradients are defined for
@@ -36,11 +37,41 @@ for i = 1:max_no_of_iterations
         error('Please enter the number 0 or 1 in the sixth argument of the function');
     end
     no_of_iterations = no_of_iterations + 1;
+    grad_f_prev = 2*J(xcurrent)'*r(xcurrent);
+    norm_grad_f_prev = norm(grad_f_prev);
+    fcurrent = f(xcurrent);
     rel_diff = abs(f(xnew)-f(xcurrent))/abs(f(xcurrent));
+   
     grad_f = 2*J(xnew)'*r(xnew);
+    norm_grad_f = norm(grad_f);
+    norm_grad_diff = norm(norm_grad_f - norm_grad_f_prev);
     xcurrent = xnew;
+    
+     % Print out
+    if printout == 1
+        if no_of_iterations >= 100
+            fprintf('%s %7s %12s %13s %13s %13s\n','iter', 'x', 'f(x)','norm(grad)','norm(grad.diff)','rel.diff f');
+            fprintf('%d %10.4f %10.4f %10.4f %10.4f %14.4f\n',no_of_iterations,xcurrent(1),fcurrent,norm_grad_f,norm_grad_diff,rel_diff);
+            for i = 2:length(start)
+                fprintf('%s %11.4f %10.2s %10.2s %10s\n',' ',xcurrent(i),' ',' ',' ');
+            end
+        elseif no_of_iterations >= 10
+            fprintf('%s %7s %12s %13s %13s %13s\n','iter', 'x', 'f(x)','norm(grad)','norm(grad.diff)','rel.diff f');
+            fprintf('%d %10.4f %10.4f %10.4f %10.4f %14.4f\n',no_of_iterations,xcurrent(1),fcurrent,norm_grad_f,norm_grad_diff,rel_diff);
+            for i = 2:length(start)
+               fprintf('%s %11.4f %10.2s %10.2s %10s\n',' ',xcurrent(i),' ',' ',' ');
+            end
+        else   
+            fprintf('%s %7s %12s %13s %14s %13s\n','iter', 'x', 'f(x)','norm(grad)','norm(grad.diff)','rel.diff f');
+            fprintf('%d %11.4f %12.4f %12.4f %12.4f %15.4f\n',no_of_iterations,xcurrent(1),fcurrent,norm_grad_f,norm_grad_diff,rel_diff);
+            for i = 2:length(start)
+                fprintf('%s %11.4f %10.2s %10.2s %10s\n',' ',xcurrent(i),' ',' ',' ');
+            end
+        end
+    end 
+    
     % Termination criterion
-    if (rel_diff < tol) && (norm(grad_f) < tol)
+    if (rel_diff < tol) && (norm_grad_diff < norm_tol)
         break;
     end
 end
