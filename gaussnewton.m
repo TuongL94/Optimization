@@ -1,15 +1,27 @@
 function [xmin] = gaussnewton(phi,t,y,start,tol,use_linesearch,printout,plotout)
-%GAUSSNEWTON Summary of this function goes here
-%   Detailed explanation goes here
+% Computes the optimal parameters for the fitting function phi using the
+% Gauss Newton method. 
+% Input:   phi - fitting function
+%            t - independent data point values
+%            y - dependent data point values
+%        start - initial point
+%          tol - tolerance used for stopping criterion
+%        use_linesearch - determines if linesearch is to be used. 0 means
+%        that linesearch will not be used, 1 implies that it will be used.
+%        printout - Setting this to 1 generates printout of the
+%        optimization process
+%        plotout - Setting this to 1 generates plots of the data points and
+%        the fitted function
+%
+% Output:   xmin - the optimal parameters for the fitting function
 
 if length(start) ~= 2 && length(start) ~= 4
     error('Please choose a starting point of 2 or 4 dimensions.')
 end
     
 % Parameters
-max_no_of_iterations = 102;
+max_no_of_iterations = 100;
 no_of_iterations = 0;
-norm_tol = 10^3*tol;
 
 % Define the residual functions and their gradients. If the start point is
 % of 2 variables the residual functions and the gradients are defined for
@@ -36,20 +48,26 @@ for i = 1:max_no_of_iterations
     else
         error('Please enter the number 0 or 1 in the sixth argument of the function');
     end
-    no_of_iterations = no_of_iterations + 1;
-    grad_f_prev = 2*J(xcurrent)'*r(xcurrent);
-    norm_grad_f_prev = norm(grad_f_prev);
     fcurrent = f(xcurrent);
     rel_diff = abs(f(xnew)-f(xcurrent))/abs(f(xcurrent));
    
     grad_f = 2*J(xnew)'*r(xnew);
     norm_grad_f = norm(grad_f);
-    norm_grad_diff = norm(norm_grad_f - norm_grad_f_prev);
     xcurrent = xnew;
     
-     % Print out
+    if no_of_iterations == 0 && printout == 1
+            fprintf('%s %7s %15s %15s\n','iter', 'x', 'f(x)','norm(grad)');
+            fprintf('%d %13.4f %13.4f %12.4f\n',no_of_iterations,start(1),fcurrent,norm_grad_f);
+            for i = 2:length(start)
+                fprintf('%s %13.4f %10.2s\n',' ',start(i),' ');
+            end
+    end
+    
+    no_of_iterations = no_of_iterations + 1;
+    
+    % Print out
     if printout == 1
-        if no_of_iterations >= 10
+       if no_of_iterations >= 10
             fprintf('%s %7s %15s %15s %15s\n','iter', 'x', 'f(x)','norm(grad)','rel.diff(f)');
             fprintf('%d %12.4f %13.4f %12.4f %16.7f\n',no_of_iterations,xcurrent(1),fcurrent,norm_grad_f,rel_diff);
             for i = 2:length(start)
@@ -64,9 +82,13 @@ for i = 1:max_no_of_iterations
         end
     end 
     
-  %  Termination criterion
+    % Termination criterion
     if (rel_diff < tol)
         break;
+    end
+    
+    if no_of_iterations == max_no_of_iterations && (rel_diff > tol)
+        disp('The algorithm failed to converge within the maximum number of iterations')
     end
 end
 xmin = xcurrent;
