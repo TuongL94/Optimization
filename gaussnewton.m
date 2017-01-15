@@ -7,7 +7,7 @@ if length(start) ~= 2 && length(start) ~= 4
 end
     
 % Parameters
-max_no_of_iterations = 100;
+max_no_of_iterations = 102;
 no_of_iterations = 0;
 norm_tol = 10^3*tol;
 
@@ -49,29 +49,23 @@ for i = 1:max_no_of_iterations
     
      % Print out
     if printout == 1
-        if no_of_iterations >= 100
-            fprintf('%s %7s %12s %13s %13s %13s\n','iter', 'x', 'f(x)','norm(grad)','norm(grad.diff)','rel.diff f');
-            fprintf('%d %10.4f %10.4f %10.4f %10.4f %14.4f\n',no_of_iterations,xcurrent(1),fcurrent,norm_grad_f,norm_grad_diff,rel_diff);
+        if no_of_iterations >= 10
+            fprintf('%s %7s %15s %15s %15s\n','iter', 'x', 'f(x)','norm(grad)','rel.diff(f)');
+            fprintf('%d %12.4f %13.4f %12.4f %16.7f\n',no_of_iterations,xcurrent(1),fcurrent,norm_grad_f,rel_diff);
             for i = 2:length(start)
-                fprintf('%s %11.4f %10.2s %10.2s %10s\n',' ',xcurrent(i),' ',' ',' ');
-            end
-        elseif no_of_iterations >= 10
-            fprintf('%s %7s %12s %13s %13s %13s\n','iter', 'x', 'f(x)','norm(grad)','norm(grad.diff)','rel.diff f');
-            fprintf('%d %10.4f %10.4f %10.4f %10.4f %14.4f\n',no_of_iterations,xcurrent(1),fcurrent,norm_grad_f,norm_grad_diff,rel_diff);
-            for i = 2:length(start)
-               fprintf('%s %11.4f %10.2s %10.2s %10s\n',' ',xcurrent(i),' ',' ',' ');
+               fprintf('%s %13.4f %13.2s %10s\n',' ',xcurrent(i),' ',' ');
             end
         else   
-            fprintf('%s %7s %12s %13s %14s %13s\n','iter', 'x', 'f(x)','norm(grad)','norm(grad.diff)','rel.diff f');
-            fprintf('%d %11.4f %12.4f %12.4f %12.4f %15.4f\n',no_of_iterations,xcurrent(1),fcurrent,norm_grad_f,norm_grad_diff,rel_diff);
+            fprintf('%s %7s %15s %15s %15s\n','iter', 'x', 'f(x)','norm(grad)','rel.diff(f)');
+            fprintf('%d %13.4f %13.4f %12.4f %16.7f\n',no_of_iterations,xcurrent(1),fcurrent,norm_grad_f,rel_diff);
             for i = 2:length(start)
-                fprintf('%s %11.4f %10.2s %10.2s %10s\n',' ',xcurrent(i),' ',' ',' ');
+                fprintf('%s %13.4f %10.2s %10s\n',' ',xcurrent(i),' ',' ');
             end
         end
     end 
     
-    % Termination criterion
-    if (rel_diff < tol) && (norm_grad_diff < norm_tol)
+  %  Termination criterion
+    if (rel_diff < tol)
         break;
     end
 end
