@@ -1,9 +1,64 @@
 [t1 y1] = data1;
 [t2 y2] = data2;
-tol = 10^-5;
-xstart = [5; 5; 5; 5];
+tol = 10^-6;
+dim = 4;
 
-min = gaussnewton(@phi2,t1,y1,xstart,tol,0,1,1);
+r_1 = @(x) (phi1(x,t2) - y2);
+f_1 = @(x) sum(r_1(x).^2);
+r_2 = @(x) (phi2(x,t2) - y2);
+f_2 = @(x) sum(r_2(x).^2);
+
+% Upper bounds for initial point for Gauss Newton method 
+% wihtout linesearch. Lower bound is 0 for all variables.
+% if dim == 2
+%     F = zeros(100,100);
+%     x1 = y2(1);
+%     x2 = 2;
+%     x1_grid = linspace(0,x1,100);
+%     x2_grid = linspace(0,x2,100);
+%     % Computes the value of the objective function at the grid points
+%     for i = 1:length(x1_grid)
+%         for j = 1:length(x2_grid)
+%             F(i,j) = f_1([x1_grid(i) x2_grid(j)]);
+%         end
+%     end
+%     [fmin,ind] = min(F(:));
+%     [m,n] = ind2sub(size(F),ind);
+%     xstart = [x1_grid(m) ; x2_grid(n)];
+%     min = gaussnewton(@phi1,t2,y2,xstart,tol,0,1,0);
+% elseif dim == 4
+%     x1 = y2(1);
+%     x2 = 10;
+%     x3 = y2(1);
+%     x4 = 10;
+%     x1_grid = linspace(0,x1,20);
+%     x2_grid = linspace(0,x2,20);
+%     x3_grid = linspace(0,x3,20);
+%     x4_grid = linspace(0,x4,20);
+%     fmin = realmax;
+%     index_vec = zeros(4,1);
+%     for i = 1:length(x1_grid)
+%         for j = 1:length(x2_grid)
+%             for k = 1:length(x3_grid)
+%                 for l = 1:length(x4_grid)
+%                     fval = f_2([x1_grid(i);x2_grid(j);x3_grid(k);x4_grid(l)]);
+%                     if fval < fmin
+%                         fmin = fval;
+%                         index_vec(1) = i;
+%                         index_vec(2) = j;
+%                         index_vec(3) = k;
+%                         index_vec(4) = l;
+%                     end
+%                 end
+%             end
+%         end
+%     end
+%     xstart = [x1_grid(index1);x2_grid(index2);x3_grid(index3);x4_grid(index4)];
+%     min = gaussnewton(@phi2,t2,y2,xstart,tol,0,1,0);
+% end
+
+xstart = [5;5;5;5];
+min = gaussnewton(@phi2,t2,y2,xstart,tol,1,1,0);
 
 % n_points = 20;
 % 
@@ -30,7 +85,6 @@ min = gaussnewton(@phi2,t1,y1,xstart,tol,0,1,1);
 % converge
 %         
 
-
 % n_points = 20;
 % 
 % x_low = 8;
@@ -53,6 +107,6 @@ min = gaussnewton(@phi2,t1,y1,xstart,tol,0,1,1);
 %         converge(i) = 1;
 %     end
 % end
-% converge
+% converge1);
      
         
