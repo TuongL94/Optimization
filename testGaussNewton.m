@@ -123,5 +123,28 @@ for i = 1:n_points
     end
 end
 converge
+
+%%
+% Test case: phi2 and data2
+n_points = 20;
+xmin_real = [9.7389; 2.9208; 4.1742; 0.8748];
+epsilon = 1;
+
+x1_interval = (xmin_real(1)-epsilon) + 2*epsilon.*rand(n_points,1);
+x2_interval = (xmin_real(2)-epsilon) + 2*epsilon.*rand(n_points,1);
+x3_interval = (xmin_real(3)-epsilon) + 2*epsilon.*rand(n_points,1);
+x4_interval = (xmin_real(4)-epsilon) + 2*epsilon.*rand(n_points,1);
+
+converge = zeros(1,n_points);
+
+for i = 1:n_points
+    x_start = [x1_interval(i); x2_interval(i); x3_interval(i); x4_interval(i)];
+    xmin =  gaussnewton(@phi2,t2,y2,x_start,tol,1,0,0);
+    diff = norm(xmin_real - xmin);
+    if diff < tol*10^4
+        converge(i) = 1;
+    end
+end
+sum(converge)/n_points
      
         
