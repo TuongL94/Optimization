@@ -112,20 +112,18 @@ converge
 % Test case: phi2 and data1
 n_points = 10;
 xmin_real = [6.3446; 10.5867; 6.0958; 1.4003];
-x1 = y1(1);
-x2 = 10;
-x3 = y1(1);
-x4 = 10;
 
-x13_interval = x1*rand(n_points,1);
-x24_interval = x2.*rand(n_points,1);
+x1_interval = (xmin_real(1)-1) + 2.*rand(n_points,1);
+x2_interval = (xmin_real(2)-1) + 2.*rand(n_points,1);
+x3_interval = (xmin_real(3)-1) + 2.*rand(n_points,1);
+x4_interval = (xmin_real(4)-1) + 2.*rand(n_points,1);
 
 converge = zeros(1,n_points);
 for i = 1:n_points
-    x_start = [x13_interval(i); x24_interval(i); x13_interval(i); x24_interval(i)];
+    x_start = [x1_interval(i); x2_interval(i); x3_interval(i); x4_interval(i)];
     xmin =  gaussnewton(@phi2,t1,y1,x_start,tol,1,0,0);
     diff = norm(xmin_real - xmin);
-    if diff < tol*10^3
+    if diff < tol*10^4
         converge(i) = 1;
     end
 end
