@@ -4,7 +4,7 @@ function [xmin] = gaussnewton(phi,t,y,start,tol,use_linesearch,printout,plotout)
 % Input:   phi - fitting function
 %            t - independent data point values
 %            y - dependent data point values
-%        start - initial point
+%        start - initial point, given as a column vector
 %          tol - tolerance used for stopping criterion
 %        use_linesearch - determines if linesearch is to be used. 0 means
 %        that linesearch will not be used, 1 implies that it will be used.
@@ -22,6 +22,7 @@ end
 % Parameters
 max_no_of_iterations = 100;
 no_of_iterations = 0;
+norm_tol = 0.5; % tolerance for the norm of the gradient at local minimum 
 
 % Define the residual functions and their gradients. If the start point is
 % of 2 variables the residual functions and the gradients are defined for
@@ -69,13 +70,15 @@ for i = 1:max_no_of_iterations
     if printout == 1
        if no_of_iterations >= 10
             fprintf('%s %7s %15s %15s %15s\n','iter', 'x', 'f(x)','norm(grad)','rel.diff(f)');
-            fprintf('%d %12.4f %13.4f %12.4f %16.7f\n',no_of_iterations,xcurrent(1),fcurrent,norm_grad_f,rel_diff);
+            fprintf('%d %12.4f %13.4f %12.4f %16.7f\n',no_of_iterations,xcurrent(1),...
+            fcurrent,norm_grad_f,rel_diff);
             for i = 2:length(start)
                fprintf('%s %13.4f %13.2s %10s\n',' ',xcurrent(i),' ',' ');
             end
         else   
             fprintf('%s %7s %15s %15s %15s\n','iter', 'x', 'f(x)','norm(grad)','rel.diff(f)');
-            fprintf('%d %13.4f %13.4f %12.4f %16.7f\n',no_of_iterations,xcurrent(1),fcurrent,norm_grad_f,rel_diff);
+            fprintf('%d %13.4f %13.4f %12.4f %16.7f\n',no_of_iterations,xcurrent(1),...
+            fcurrent,norm_grad_f,rel_diff);
             for i = 2:length(start)
                 fprintf('%s %13.4f %10.2s %10s\n',' ',xcurrent(i),' ',' ');
             end
@@ -83,12 +86,12 @@ for i = 1:max_no_of_iterations
     end 
     
     % Termination criterion
-    if (rel_diff < tol)
+    if (rel_diff < tol) && norm_grad_f < norm_tol
         break;
     end
     
-    if no_of_iterations == max_no_of_iterations && (rel_diff > tol)
-        disp('The algorithm failed to converge within the maximum number of iterations')
+    if no_of_iterations == max_no_of_iterations && ((rel_diff > tol) || (norm_grad_f > norm_tol))
+        disp('The algorithm failed to converge to a local minimum within the maximum number of iterations')
     end
 end
 xmin = xcurrent;
