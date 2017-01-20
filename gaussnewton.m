@@ -1,3 +1,4 @@
+function [xmin] = gaussnewton(phi,t,y,start,tol,use_linesearch,printout,plotout)
 % Input:   phi - fitting function
 %            t - independent data point values
 %            y - dependent data point values
@@ -20,7 +21,6 @@ end
 max_no_of_iterations = 100;
 no_of_iterations = 0;
 norm_tol = 0.5; % tolerance for the norm of the gradient at local minimum 
-epsilon = 0.0001;
 
 % Define the residual functions and their gradients. If the start point is
 % of 2 variables the residual functions and the gradients are defined for
@@ -38,10 +38,12 @@ end
 
 xcurrent = start;
 for i = 1:max_no_of_iterations
+    epsilon = 0.01;
     H = J(xcurrent)'*J(xcurrent);
-    [R,p] = chol(H);
-    while p > 0
+    [~,p] = chol(H);
+    while (cond(H) > 1000) && (p > 0)
         H = H + epsilon*eye(size(H,1));
+        [~,p] = chol(H);
         epsilon = 4*epsilon;
     end
     d = H\(-J(xcurrent)'*r(xcurrent));

@@ -11,17 +11,11 @@ function [lambda, No_of_iterations] = linesearch(func,x,d)
 No_of_iterations = 0;
 F_zero = func(x);
 lambda = 1;
-alpha = 2.0;
-epsilon = 0.45;
+alpha = 2;
+epsilon = 0.3;
 
-% Approximation of the step size that will be used in the derivative
-% approximation
-while func(x+lambda*d) >= F_zero || func(x+alpha*lambda*d) <= F_zero
-    if func(x+lambda*d) > F_zero
-        lambda = lambda/alpha;
-    else
-        lambda = lambda*alpha;
-    end
+while isnan(func(x+lambda*d))
+    lambda = lambda/alpha;
 end
 
 h = 0.01*lambda; % Step size used for derivative approximation

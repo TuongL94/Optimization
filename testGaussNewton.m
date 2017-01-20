@@ -59,8 +59,8 @@ end
 
 %%
 
-xstart = [10;2];
-min = gaussnewton(@phi1,t2,y2,xstart,tol,1,1,0);
+xstart = [2 5 4 6]';
+min = gaussnewton(@phi2,t2,y2,xstart,tol,1,1,0);
 
 %%
 % Test case: phi1 and data1
