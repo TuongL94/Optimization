@@ -1,6 +1,3 @@
-function [xmin] = gaussnewton(phi,t,y,start,tol,use_linesearch,printout,plotout)
-% Computes the optimal parameters for the fitting function phi using the
-% Gauss Newton method. 
 % Input:   phi - fitting function
 %            t - independent data point values
 %            y - dependent data point values
@@ -23,6 +20,7 @@ end
 max_no_of_iterations = 100;
 no_of_iterations = 0;
 norm_tol = 0.5; % tolerance for the norm of the gradient at local minimum 
+epsilon = 0.0001;
 
 % Define the residual functions and their gradients. If the start point is
 % of 2 variables the residual functions and the gradients are defined for
@@ -40,7 +38,13 @@ end
 
 xcurrent = start;
 for i = 1:max_no_of_iterations
-    d = (J(xcurrent)'*J(xcurrent))\(-J(xcurrent)'*r(xcurrent));
+    H = J(xcurrent)'*J(xcurrent);
+    [R,p] = chol(H);
+    while p > 0
+        H = H + epsilon*eye(size(H,1));
+        epsilon = 4*epsilon;
+    end
+    d = H\(-J(xcurrent)'*r(xcurrent));
     if use_linesearch == 1
         lambda = linesearch(f,xcurrent,d);
         xnew = xcurrent+lambda*d;
@@ -102,6 +106,7 @@ if plotout == 1
     hold on
     plot(t,y,'ro')
 end
+
 
 
 
