@@ -40,12 +40,20 @@ xcurrent = start;
 for i = 1:max_no_of_iterations
     epsilon = 0.01;
     H = J(xcurrent)'*J(xcurrent);
-    [~,p] = chol(H);
-    while (cond(H) > 1000) && (p > 0)
-        H = H + epsilon*eye(size(H,1));
-        [~,p] = chol(H);
+    H_mod = H;
+    [~,p] = chol(H_mod);
+    while (p > 0)
+        H_mod = H + epsilon*eye(size(H,1));
+        [~,p] = chol(H_mod);
         epsilon = 4*epsilon;
     end
+    H = H_mod;
+    epsilon = 0.01;
+    while cond(H_mod) > 10000000
+        H_mod = H + epsilon*eye(size(H,1));
+        epsilon = 4*epsilon;
+    end
+    H = H_mod;
     d = H\(-J(xcurrent)'*r(xcurrent));
     if use_linesearch == 1
         lambda = linesearch(f,xcurrent,d);

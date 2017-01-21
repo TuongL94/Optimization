@@ -59,7 +59,7 @@ end
 
 %%
 
-xstart = [2 5 4 6]';
+xstart = [4 6 2 5.5]';
 min = gaussnewton(@phi2,t2,y2,xstart,tol,1,1,0);
 
 %%
