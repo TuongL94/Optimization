@@ -1,3 +1,6 @@
+function [xmin] = gaussnewton(phi,t,y,start,tol,use_linesearch,printout,plotout)
+% Computes the optimal parameters for the fitting function phi using the
+% Gauss Newton method. 
 % Input:   phi - fitting function
 %            t - independent data point values
 %            y - dependent data point values
@@ -19,8 +22,7 @@ end
 % Parameters
 max_no_of_iterations = 100;
 no_of_iterations = 0;
-norm_tol = 0.5; % tolerance for the norm of the gradient at local minimum 
-epsilon = 0.0001;
+norm_tol = 0.01; % tolerance for the norm of the gradient at local minimum 
 
 % Define the residual functions and their gradients. If the start point is
 % of 2 variables the residual functions and the gradients are defined for
@@ -38,15 +40,22 @@ end
 
 xcurrent = start;
 for i = 1:max_no_of_iterations
+    epsilon = 1;
     H = J(xcurrent)'*J(xcurrent);
-    [R,p] = chol(H);
+    [~,p] = chol(H);
     while p > 0
         H = H + epsilon*eye(size(H,1));
         epsilon = 4*epsilon;
+        [~,p] = chol(H);
+    end
+    delta = 0.01;
+    while cond(H) > 10000000
+        H = H + delta*eye(size(H,1));
+        delta = 4*delta;
     end
     d = H\(-J(xcurrent)'*r(xcurrent));
     if use_linesearch == 1
-        lambda = linesearch(f,xcurrent,d);
+        [lambda, ls_iterations] = linesearch(f,xcurrent,d);
         xnew = xcurrent+lambda*d;
     elseif use_linesearch == 0
         xnew = xcurrent+d;
@@ -54,40 +63,59 @@ for i = 1:max_no_of_iterations
         error('Please enter the number 0 or 1 in the sixth argument of the function');
     end
     fcurrent = f(xcurrent);
-    rel_diff = abs(f(xnew)-f(xcurrent))/abs(f(xcurrent));
-   
+    rel_diff = abs(f(xnew)-fcurrent)/abs(fcurrent);
     grad_f = 2*J(xnew)'*r(xnew);
     norm_grad_f = norm(grad_f);
     xcurrent = xnew;
-    
-    if no_of_iterations == 0 && printout == 1
-            fprintf('%s %7s %15s %15s\n','iter', 'x', 'f(x)','norm(grad)');
-            fprintf('%d %13.4f %13.4f %12.4f\n',no_of_iterations,start(1),fcurrent,norm_grad_f);
-            for i = 2:length(start)
-                fprintf('%s %13.4f %10.2s\n',' ',start(i),' ');
-            end
-    end
-    
     no_of_iterations = no_of_iterations + 1;
     
-    % Print out
     if printout == 1
-       if no_of_iterations >= 10
-            fprintf('%s %7s %15s %15s %15s\n','iter', 'x', 'f(x)','norm(grad)','rel.diff(f)');
-            fprintf('%d %12.4f %13.4f %12.4f %16.7f\n',no_of_iterations,xcurrent(1),...
-            fcurrent,norm_grad_f,rel_diff);
-            for i = 2:length(start)
-               fprintf('%s %13.4f %13.2s %10s\n',' ',xcurrent(i),' ',' ');
-            end
-        else   
-            fprintf('%s %7s %15s %15s %15s\n','iter', 'x', 'f(x)','norm(grad)','rel.diff(f)');
-            fprintf('%d %13.4f %13.4f %12.4f %16.7f\n',no_of_iterations,xcurrent(1),...
-            fcurrent,norm_grad_f,rel_diff);
-            for i = 2:length(start)
-                fprintf('%s %13.4f %10.2s %10s\n',' ',xcurrent(i),' ',' ');
+        if i == 1
+            fprintf('%s %7s %15s %15s\n','iter', 'x', 'f(x)','norm(grad)');
+            fprintf('%d %13.4f %13.4f %12.4f\n',0,start(1),f(start),norm(2*J(start)'*r(start)));
+            for j = 2:length(start)
+                fprintf('%s %13.4f %10.2s\n',' ',start(j),' ');
             end
         end
-    end 
+        if no_of_iterations >= 10
+            fprintf('%s %7s %15s %15s %15s %15s\n','iter', 'x', 'f(x)','norm(grad)','rel.diff(f)','ls iters');
+            fprintf('%d %12.4f %13.4f %12.4f %16.7f %16.0f\n',no_of_iterations,xcurrent(1),...
+                f(xcurrent),norm_grad_f,rel_diff,ls_iterations);
+            for j = 2:length(start)
+                fprintf('%s %13.4f %13.2s %10s\n',' ',xcurrent(j),' ',' ');
+            end
+        else
+            fprintf('%s %7s %15s %15s %15s %13s\n','iter', 'x', 'f(x)','norm(grad)','rel.diff(f)','ls iters');
+            fprintf('%d %13.4f %13.4f %12.4f %16.7f %12.0f\n',no_of_iterations,xcurrent(1),...
+                f(xcurrent),norm_grad_f,rel_diff,ls_iterations);
+            for j = 2:length(start)
+                fprintf('%s %13.4f %10.2s %10s\n',' ',xcurrent(j),' ',' ');
+            end
+        end
+    end
+    
+    % Termination criterion
+    if (rel_diff < tol) && norm_grad_f < norm_tol
+        break;
+    end
+    
+    if f(xcurrent) - fcurrent > 0 || isnan(f(xcurrent)) || isnan(norm_grad_f)
+        disp('The algorithm failed to converge to a local minimum.')
+        break;
+    end
+    
+    if no_of_iterations == max_no_of_iterations && ((rel_diff > tol) || (norm_grad_f > norm_tol))
+        disp('The algorithm failed to converge to a local minimum within the maximum number of iterations.')
+    end
+end
+xmin = xcurrent;
+
+if plotout == 1
+    grid = linspace(floor(min(t)),ceil(max(t)),100);
+    plot(grid,phi(xmin,grid))
+    hold on
+    plot(t,y,'ro')
+end
     
     % Termination criterion
     if (rel_diff < tol) && norm_grad_f < norm_tol
