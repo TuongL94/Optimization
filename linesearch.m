@@ -14,13 +14,15 @@ lambda = 1;
 alpha = 1.5;
 epsilon = 0.45;
 
-% Armijo without using the derivative (epsilon = 0) in order to get an
-% indication of the order of magnitude of the minimum.
-while func(x+lambda*d) >= F_zero || func(x+alpha*lambda*d) <= F_zero
-    if func(x+lambda*d) > F_zero
+while func(x+lambda*d) >= F_zero || func(x+alpha*lambda*d) <= F_zero  || isnan(func(x+lambda*d))
+    if isnan(func(x+lambda*d))
         lambda = lambda/alpha;
-    else
+    else    
+        if func(x+lambda*d) > F_zero
+        lambda = lambda/alpha;
+        else
         lambda = lambda*alpha;
+        end
     end
     No_of_iterations = No_of_iterations + 1;
 end
